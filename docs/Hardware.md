@@ -24,6 +24,11 @@ This project uses two main devices: an **ISP-provided Huawei ONT/router** and a 
 
 > ℹ️ No configuration changes were made to the ISP device beyond reserving a static IP (`192.168.1.2` or any free IP from the DHCP server) for the EDUP router.
 
+<img width="225" height="225" alt="image" src="https://github.com/user-attachments/assets/92b757f3-f765-421b-badd-1db014baa8f5" /> 
+<img width="225" height="225" alt="image" src="https://github.com/user-attachments/assets/44403593-3ba4-4299-811e-09ded6eab808" />
+<img width="225" height="225" alt="image" src="https://github.com/user-attachments/assets/a263a9bb-e118-4e37-b037-a35e6e67794c" />
+<img width="281" height="179" alt="image" src="https://github.com/user-attachments/assets/3dfc57e2-66f9-4663-94cd-5304fdf28a8e" />
+
 ---
 
 ## 2. OpenWrt VPN Gateway: EDUP AX3000
@@ -53,8 +58,37 @@ This project uses two main devices: an **ISP-provided Huawei ONT/router** and a 
 - **Active OpenWrt community**: Stable, well-maintained support.
 - **Cost-effective**: ~$50–60 USD with strong performance.
 
-> 💡 **Note**: This is **not** the same as the smaller "EDUP AX1800" or older models. Ensure you have the **AX3000** version with **128 MB flash**.
+<img width="225" height="225" alt="image" src="https://github.com/user-attachments/assets/73e2386d-f083-465e-86f8-548c939b5c9c" />
+<img width="225" height="225" alt="image" src="https://github.com/user-attachments/assets/c355cec5-6e2c-4330-9b05-a6e8953a270c" />
+<img width="500" height="225" alt="image" src="https://github.com/user-attachments/assets/b56dd185-70bb-4a59-a310-e01299052d2e" />
 
 ---
 
 ## 🔌 Physical Connection Diagram
+
+```bash
+[ Fiber Line ]
+  ↓
+[ Huawei HG8245H5 ] ← (ISP ONT + Router)
+  │
+  │ (LAN port → Gigabit Ethernet)
+  ↓
+[ EDUP AX3000 ] ← (OpenWrt VPN Gateway)
+  ├─ Wi-Fi 2.4 GHz → "Personal-VPN-2.4"
+  └─ Wi-Fi 5 GHz → "Personal-VPN-5"
+```
+
+- All devices connecting to **EDUP’s Wi-Fi** are routed through OpenVPN.
+- Devices on **Huawei’s Wi-Fi** use direct internet (no VPN).
+
+---
+
+## 📏 Performance Notes
+
+| Task | Expected Throughput |
+|------|---------------------|
+| Raw internet (bypassing EDUP) | ~300 Mbps (ISP fiber plan) |
+| EDUP AX3000 without OpenVPN | ~100–300 Mbps |
+| EDUP AX3000 without OpenVPN | ~30–200 Mbps |
+
+> ⚠️ OpenVPN on ARM CPUs (like MT7622) is **CPU-bound**, not network-bound. Speed depends on encryption cipher.
