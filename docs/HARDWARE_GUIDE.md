@@ -95,7 +95,7 @@ This project uses two main devices: an **ISP-provided Huawei ONT/router** and a 
  
 ---
 
-# Setup Guide
+## 3. Setup Guide
 
 1. Connect both routers to the power and turn them ON.
 2. Connect the ISP's router LAN port and the EDUP router WAN port using an RJ45 network cable.
