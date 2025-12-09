@@ -92,3 +92,19 @@ This project uses two main devices: an **ISP-provided Huawei ONT/router** and a 
 | EDUP AX3000 through OpenVPN | ~30–200 Mbps |
 
 > ⚠️ OpenVPN on ARM CPUs (like MT7622) is **CPU-bound**, not network-bound. Speed depends on encryption cipher.
+ 
+---
+
+# Setup Guide
+
+1. Connect both routers to the power and turn them ON.
+2. Connect the ISP's router LAN port and the EDUP router WAN port using an RJ45 network cable.
+3. Check your **ISP Router (Huawei HG8245H5)** is already working and handing out IPs in `192.168.1.0/24`.
+  - Connect to the ISP router network. (Just type `192.168.1.1` in your browser URL bar)
+  - Log in to the ISP router using the administrator credentials. (See the backside of the ISP Router)
+  - Go to the DHCP server settings. (**Advanced Setting → WAN → DHCP Server**)
+  - Verify the DHCP server settings are set up for the `192.168.1.1/24` network.
+4. **Reserve a static IP `192.168.1.2`** for your EDUP AX3000 on the ISP router (via MAC address binding)
+  - In the ISP router settings, go to the **Advanced Settings → WAN → Static IP**
+  - Add a new entry and bind the IP with the AX3000 MAC, then **save**.
+  - Remove and replug the network cable to the ISP router.
