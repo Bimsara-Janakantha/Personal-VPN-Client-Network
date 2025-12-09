@@ -97,3 +97,19 @@ From any device on your **Personal VPN Wi-Fi**:
 - **Performance**: Expect 10–200 Mbps throughput on EDUP AX3000 (CPU-limited by software encryption).
 - **Storage**: On 16MB-flash devices, prefer `openvpn-mbedtls` to save space.
 
+---
+
+## 📁 Repository Structure
+
+```Bash
+.
+├── README.md # This overview
+├── docs/
+│ └── SETUP_GUIDE.md # Complete LuCI-based walkthrough
+├── configs/
+│ └── example.ovpn # Template (secrets redacted)
+└── screenshots/ # LuCI UI reference (optional)
+```
+
+> 🔐 **Your network. Your rules. Your privacy.**  
+> Build a Personal VPN Client Network — and take back control.
