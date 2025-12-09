@@ -155,22 +155,30 @@ We’ll create two secure Wi-Fi networks — both on the new `192.168.2.0/24` su
 
 ## 🔐 Step 7: Add Your OpenVPN Configuration
 
-> 📝 Make sure your `.ovpn` file includes:
-> ```text
-> client
-> dev tun
-> redirect-gateway def1
-> ```
+1. Download and extract the VPN configuration files to your computer.  
+   Be sure to choose the **IP address** option in the configuration generator.
 
-1. Download and extract our config files to your computer. Choose the IP address option on the configuration generator. 
-2. In your router,  navigate to **VPN → OpenVPN**
-3. Under the **OVPN configuration file upload** section, **Browse** for the `.ovpn` config file with the VPN server you would like to connect to, give it any name (e.g. OVPN), then click **Upload**
-4. Click the Edit button next to the created OpenVPN instance and enter your IVPN account ID that begins with letters ‘ivpnXXXXXXXX’ or ‘i-XXXX-XXXX-XXXX’ (case-sensitive) and any password (e.g. ivpn) in 2 separate lines in the text box at the bottom.
-5. Append the credentials file path to the `auth-user-pass` line in the first text box. The full path is visible just above the second text box. (e.g. `auth-user-pass /etc/openvpn/Austria.auth`).
+2. On your router, navigate to **VPN → OpenVPN**.
+
+3. Under the **OVPN configuration file upload** section, click **Browse** and select the `.ovpn` file for the VPN server you want to connect to.  
+   Give it any name (e.g., `OVPN`), then click **Upload**.
+
+4. Click **Edit** next to the created OpenVPN instance.  
+   Enter your IVPN account ID (e.g., `ivpnXXXXXXXX` or `i-XXXX-XXXX-XXXX`, case-sensitive) and **any password** (e.g., `ivpn`) in **two separate lines** in the text box at the bottom.
+
+5. Append the credentials file path to the `auth-user-pass` line in the first text box.  
+   The full path is displayed above the second text box.  
+   Example:  `auth-user-pass /etc/openvpn/Austria.auth`
+
 6. Click **Save**.
-   <img width="866" height="598" alt="image" src="https://github.com/user-attachments/assets/f6f06bbe-84dd-4b4c-910e-abd89884e471" />
-   > Note: This may depend on your OpenVPN provider. In my case, I don't need to do steps 4, 5 and 6.
-7. Return to the main **OpenVPN** section, check the **Enabled** checkbox and click on the **Save & Apply** button.
+
+<img width="866" height="598" alt="image" src="https://github.com/user-attachments/assets/f6f06bbe-84dd-4b4c-910e-abd89884e471" />
+
+> **Note:** Steps 4–6 may vary depending on your OpenVPN provider.  
+> For some providers, these steps may not be required.
+
+7. Return to the main **OpenVPN** section, check the **Enabled** checkbox, and click **Save & Apply**.
+
 
 ---
 
@@ -182,71 +190,58 @@ Even if `tun0` doesn’t exist yet, we’ll create a placeholder.
 2. Fill in:
 - **Name**: `VPN`
 - **Protocol**: `Unmanaged`
-- **Interface**: type exactly → `tun0`
-3. Click **Create Interface**
-4. Under **Firewall Settings**:
-- In the dropdown, **type `vpn`** (it will create a new zone)
-5. Click **Save**
+- **Interface**: type exactly → `tun0` then press Enter key.
 
-> ✅ This will bind to the `tun0` device once OpenVPN starts.
+<img width="817" height="217" alt="image" src="https://github.com/user-attachments/assets/9490b99f-d21b-4d45-9390-e53ec0c0e386" />
+
+
+3. Click **Create Interface**
+4. In the interface properties window, ensure that Bring up on boot is checked, then click **Save & Save & Apply** buttons.
 
 ---
 
-## 🔥 Step 8: Configure Firewall Zones (Critical!)
+## 🔥 Step 9: Configure Firewall Zones (Critical!)
 
 We’ll ensure **only VPN traffic leaves your network**.
+Navigate to **Network → Firewall**
 
-### A. Edit the `lan` Zone
+### A. Edit the `vpn` Zone
+1. Click the **Add** button and enter the following configuration:
+   - **Name**: Give it any name (e.g. ovpn_fw)
+   - **Input**: `reject`
+   - **Output**: `accept`
+   - **Forward**: `reject`
+   - ✔️ **Masquerading**
+   - ✔️ **MSS clamping**
+   - **Covered networks**: select the previously created VPN tunnel interface (e.g. VPN)
+   - **Allow forward to destination zones**: `Unspecified`
+   - **Allow forward from source zones**: `lan`
+
+  <img width="813" height="685" alt="image" src="https://github.com/user-attachments/assets/67093cce-da10-4141-b000-7c31d35e821c" />
+
+2. Click **Save** and **Save & Apply**
+
+### B. Edit the `lan` Zone (Configure a Kill-switch)
+To ensure the traffic on your LAN devices travels strictly via the VPN tunnel and to prevent any possible leaks if the router disconnects from the VPN server for any reason.
+
 1. Go to **Network → Firewall**
 2. Find **lan** → click **Edit**
-3. Set:
-- **Input**: `accept`
-- **Output**: `accept`
-- **Forward**: `accept`
-- **Allow forward to destination zones**: **ONLY `vpn`** (remove `wan`!)
-4. Click **Save**
+3. Set: **Allow forward to destination zones**: **ONLY `vpn`** (remove `wan`!)
+4. Click **Save** and **Save & Apply**
 
-### B. Edit the `vpn` Zone
-1. Find **vpn** → click **Edit**
-2. Set:
-- **Input**: `reject`
-- **Output**: `accept`
-- **Forward**: `accept`
-- ✔️ **Masquerading**
-- ✔️ **MSS clamping**
-- **Allow forward to destination zones**: `wan`
-- **Allow forward from source zones**: `lan`
-3. Click **Save**
+   <img width="813" height="685" alt="image" src="https://github.com/user-attachments/assets/cac9078b-052a-4b47-98c9-5ac376c4cb20" />
+
 
 > 🔒 This creates a **kill switch**: if OpenVPN stops, LAN traffic has nowhere to go.
 
 ---
 
-## 🌍 Step 9: Disable IPv6 (Prevent Leaks)
-
-1. Go to **Network → Interfaces → LAN → Edit**
-2. Go to **DHCP Server → IPv6 Settings**
-3. Set all to **Disabled**:
-- Router Advertisement Service
-- DHCPv6 Service
-- NDP Proxy
-4. Click **Save & Apply**
-5. Repeat for **WAN** interface (optional but recommended)
-
----
-
 ## ▶️ Step 10: Start OpenVPN & Verify
 
-1. Go to **Services → OpenVPN**
-2. Click **Start** next to your config
-3. Wait 15 seconds
-4. Check **Status → OpenVPN** — should say **Connected**
-5. From a device on `Personal-VPN-5`:
-- Visit [https://ipleak.net](https://ipleak.net)
-- You should see:
-  - **IP address**: your **VPN provider’s IP**
-  - **ISP**: your **VPN provider**, not SLT
-  - **No DNS leaks**
+1. Go to **Network → Interfaces**
+2. You can see the incoming and outgoing traffic through the VPN interface.
+3. Open another tab in your web browser and visit the [whatismyipaddress.com](https://whatismyipaddress.com/).
+4. You can see your VPN provider's IP rather than the ISP's
 
 ✅ **Success!** Your Personal VPN Client Network is live.
 
@@ -257,10 +252,10 @@ We’ll ensure **only VPN traffic leaves your network**.
 1. In LuCI: **Services → OpenVPN → Stop**
 2. On your phone (still on `Personal-VPN-5`):
 - Try loading a website → should **fail**
-- `ipleak.net` → should time out
+- [whatismyipaddress.com](https://whatismyipaddress.com/) → should time out
 
 ✅ If internet dies → your kill switch works.  
-✅ If it still works → double-check **Step 8A** (LAN must NOT forward to `wan`).
+✅ If it still works → double-check **Step 8B** (LAN must NOT forward to `wan`).
 
 ---
 
@@ -270,7 +265,7 @@ We’ll ensure **only VPN traffic leaves your network**.
 2. Wait 60 seconds
 3. After reboot:
 - OpenVPN should auto-start
-- Connect to `Personal-VPN-2.4` → verify via `ipleak.net`
+- Connect to `Personal-VPN-2.4` → verify via [whatismyipaddress.com](https://whatismyipaddress.com/)
 - Confirm public IP is the **VPN IP**
 
 ---
@@ -289,5 +284,3 @@ Enjoy your **Personal VPN Client Network**! 🔐
 > 💡 **Need help?**  
 > - Check logs: **Status → System Log**  
 > - Open an Issue in this repo with your OpenWrt version and provider name
-
-5. 
