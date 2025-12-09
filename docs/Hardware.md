@@ -89,6 +89,6 @@ This project uses two main devices: an **ISP-provided Huawei ONT/router** and a 
 |------|---------------------|
 | Raw internet (bypassing EDUP) | ~300 Mbps (ISP fiber plan) |
 | EDUP AX3000 without OpenVPN | ~100–300 Mbps |
-| EDUP AX3000 without OpenVPN | ~30–200 Mbps |
+| EDUP AX3000 through OpenVPN | ~30–200 Mbps |
 
 > ⚠️ OpenVPN on ARM CPUs (like MT7622) is **CPU-bound**, not network-bound. Speed depends on encryption cipher.
