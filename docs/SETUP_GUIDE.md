@@ -134,14 +134,14 @@ We’ll create two secure Wi-Fi networks — both on the new `192.168.2.0/24` su
 
 ---
 
-## 📦 Step 5: Install OpenVPN and LuCI App
+## 📦 Step 6: Install OpenVPN and LuCI App
 
 1. Go to **System → Software**
 2. Click **Update lists** (top right)
 3. In the **Filter** box, type:
    - **openvpn-openssl** → install
    - **luci-app-openvpn** → install
-4. Click **OK**
+4. Restart your router.
    <img width="875" height="723" alt="image" src="https://github.com/user-attachments/assets/81f754bb-47ec-4e9c-b109-5499b026e6aa" />
    > Most of the time, `luci-app-openvpn` was pre-installed with the system.
    
@@ -149,13 +149,11 @@ We’ll create two secure Wi-Fi networks — both on the new `192.168.2.0/24` su
 
 > ⏳ Wait 30–60 seconds. You may see a screen about dependencies — **check “Overwrite files...”** if prompted, then click **Install**.
 
-✅ After install, refresh the page. You should now see **Services → OpenVPN** in the menu.
-
-> 💡 If you get “no space”, use `openvpn-mbedtls` instead (smaller). Most providers support it.
+✅ After install, refresh the page. You should now see **VPN → OpenVPN** in the menu.
 
 ---
 
-## 🔐 Step 6: Add Your OpenVPN Configuration
+## 🔐 Step 7: Add Your OpenVPN Configuration
 
 > 📝 Make sure your `.ovpn` file includes:
 > ```text
@@ -164,21 +162,19 @@ We’ll create two secure Wi-Fi networks — both on the new `192.168.2.0/24` su
 > redirect-gateway def1
 > ```
 
-1. Go to **Services → OpenVPN → Add**
-2. Fill in:
-- **Name**: `MyVPNProvider`
-- **Config type**: `Client`
-- **Interface**: `WAN`
-- ✔️ **Enable**
-- ✔️ **Start on boot**
-3. In **OVPN configuration file content**, **paste your entire `.ovpn` file** (including `<ca>`, `<cert>`, `<key>` blocks if present)
-4. Click **Save**
-
-> 🔍 Tip: Remove any lines like `up /etc/openvpn/update-resolv-conf` — they don’t work in LuCI.
+1. Download and extract our config files to your computer. Choose the IP address option on the configuration generator. 
+2. In your router,  navigate to **VPN → OpenVPN**
+3. Under the **OVPN configuration file upload** section, **Browse** for the `.ovpn` config file with the VPN server you would like to connect to, give it any name (e.g. OVPN), then click **Upload**
+4. Click the Edit button next to the created OpenVPN instance and enter your IVPN account ID that begins with letters ‘ivpnXXXXXXXX’ or ‘i-XXXX-XXXX-XXXX’ (case-sensitive) and any password (e.g. ivpn) in 2 separate lines in the text box at the bottom.
+5. Append the credentials file path to the `auth-user-pass` line in the first text box. The full path is visible just above the second text box. (e.g. `auth-user-pass /etc/openvpn/Austria.auth`).
+6. Click **Save**.
+   <img width="866" height="598" alt="image" src="https://github.com/user-attachments/assets/f6f06bbe-84dd-4b4c-910e-abd89884e471" />
+   > Note: This may depend on your OpenVPN provider. In my case, I don't need to do steps 4, 5 and 6.
+7. Return to the main **OpenVPN** section, check the **Enabled** checkbox and click on the **Save & Apply** button.
 
 ---
 
-## 🌐 Step 7: Create the `VPN` Interface for `tun0`
+## 🌐 Step 8: Create the `VPN` Interface for `tun0`
 
 Even if `tun0` doesn’t exist yet, we’ll create a placeholder.
 
