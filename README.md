@@ -107,9 +107,8 @@ From any device on your **Personal VPN Wi-Fi**:
 ├── docs/
 │ ├── HARDWARE_GUIDE.md # Complete Hardware walkthrough and product links
 │ └── SETUP_GUIDE.md # Complete LuCI-based walkthrough
-├── configs/
-│ └── example.ovpn # Template (secrets redacted)
-└── screenshots/ # LuCI UI reference (optional)
+└── configs/
+  └── example.ovpn # Template (secrets redacted)
 ```
 
 > 🔐 **Your network. Your rules. Your privacy.**  
