@@ -105,7 +105,7 @@ From any device on your **Personal VPN Wi-Fi**:
 .
 ├── README.md # This overview
 ├── docs/
-│ └── HARDWARE_GUIDE.md # Complete Hardware walkthrough and product links
+│ ├── HARDWARE_GUIDE.md # Complete Hardware walkthrough and product links
 │ └── SETUP_GUIDE.md # Complete LuCI-based walkthrough
 ├── configs/
 │ └── example.ovpn # Template (secrets redacted)
