@@ -65,11 +65,11 @@ This is **privacy by design**, built on open-source firmware you control — not
 
 ## 📝 Setup Highlights (LuCI Web UI Only)
 
-1. **Change EDUP LAN IP** to `192.168.2.1` (avoid conflict with SLT)
-2. **Configure WAN** as DHCP client → gets `192.168.1.2` (static lease on SLT)
+1. **Change EDUP LAN IP** to `192.168.2.1` (avoid conflict with ISP Router)
+2. **Configure WAN** as DHCP client → gets `192.168.1.2` (static lease on ISP Router)
 3. **Set up dual-band Wi-Fi** under new `192.168.2.0/24` network
 4. **Install OpenVPN + LuCI app** via **System → Software**
-5. **Paste your `.ovpn` config** in **Services → OpenVPN**
+5. **Upload your `.ovpn` config** in **VPN → OpenVPN**
 6. **Create `VPN` interface** bound to `tun0`
 7. **Configure firewall zones**:
    - `lan` → forward only to `vpn` (not `wan`)
@@ -84,7 +84,7 @@ This is **privacy by design**, built on open-source firmware you control — not
 
 From any device on your **Personal VPN Wi-Fi**:
 - ✅ Public IP = your **VPN provider’s server**
-- ✅ ISP field ≠ your real ISP (e.g., not “SLT”)
+- ✅ ISP field ≠ your real ISP (e.g., not “ISP”)
 - ✅ No DNS leaks
 - ✅ Internet dies instantly if OpenVPN stops (kill switch active)
 
@@ -94,10 +94,6 @@ From any device on your **Personal VPN Wi-Fi**:
 
 - **Double NAT is intentional**: Keeps your ISP router functional while adding privacy.
 - **IPv6 is disabled**: Prevents leak vectors (re-enable only if your VPN supports it).
-- **Performance**: Expect 30–80 Mbps throughput on EDUP AX3000 (CPU-limited by software encryption).
+- **Performance**: Expect 10–200 Mbps throughput on EDUP AX3000 (CPU-limited by software encryption).
 - **Storage**: On 16MB-flash devices, prefer `openvpn-mbedtls` to save space.
-
----
-
-## 📁 Repository Structure
 
