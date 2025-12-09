@@ -1,5 +1,7 @@
 # 🔐 Personal VPN Client Network
 
+<img width="1024" height="627" alt="Gemini_Generated_Image_2t4l1w2t4l1w2t4l" src="https://github.com/user-attachments/assets/e6ad9ccc-7c41-47f7-bc55-5a250b1dc55c" />
+
 > **A whole-home privacy solution: route all your devices through a trusted OpenVPN connection — configured entirely via OpenWrt’s LuCI web interface.**
 
 This project shows how to transform an **EDUP AX3000** router running **OpenWrt 21.02** into a dedicated **Personal VPN Client Network**. Devices connected to its Wi-Fi automatically tunnel all traffic through your chosen OpenVPN provider — with leak protection, automatic fail-safe (kill switch), and seamless coexistence with your existing ISP router.
