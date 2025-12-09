@@ -284,3 +284,4 @@ Enjoy your **Personal VPN Client Network**! 🔐
 > 💡 **Need help?**  
 > - Check logs: **Status → System Log**  
 > - Open an Issue in this repo with your OpenWrt version and provider name
+> - Reference: [OpenWrt OpenVPN Setup Guide](https://www.ivpn.net/setup/router/openwrt-openvpn/)
