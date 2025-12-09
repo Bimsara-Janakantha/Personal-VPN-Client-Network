@@ -105,24 +105,30 @@ We’ll create two secure Wi-Fi networks — both on the new `192.168.2.0/24` su
 
 ### A. Configure 2.4 GHz Wi-Fi
 1. Go to **Network → Wireless**
-2. Click **Edit** next to **2.4 GHz (radio0)**
-3. Under **Wireless Network**:
-- **Mode**: `Access Point`
-- **SSID**: `Personal-VPN-2.4` (or your preferred name)
-- **Network**: `lan`
+2. Click **Edit** next to **SSID: Openwrt_2.4G**
+3. Under **General Setup → Interface Configuration → General Setup**:
+   - **Mode**: `Access Point`
+   - **SSID**: `Personal-VPN-2.4` (or your preferred name)
+   - **Network**: `lan`
+   <img width="1212" height="537" alt="image" src="https://github.com/user-attachments/assets/3121214f-52cb-478e-a384-e56c9ff1d31f" />
+
 4. Under **Wireless Security**:
-- **Encryption**: `WPA2-PSK`
-- **Key**: `YourStrongPassword123!`
+   - **Encryption**: `WPA2-PSK/WPA3-SAE Mixed Mode`
+   - **Key**: `YourStrongPassword123!`
+   <img width="600" height="220" alt="image" src="https://github.com/user-attachments/assets/d6b5c081-9d25-4e7c-828c-de489e49b79c" />
+
 5. Click **Save**
+6. Click **Save & Apply**
 
 ### B. Configure 5 GHz Wi-Fi
-1. Click **Edit** next to **5 GHz (radio1)**
+1. Click **Edit** next to **SSID: Openwrt_5G**
 2. Same settings:
-- **SSID**: `Personal-VPN-5`
-- **Mode**: `Access Point`
-- **Network**: `lan`
-- **WPA2-PSK** + strong password
+   - **SSID**: `Personal-VPN-5`
+   - **Mode**: `Access Point`
+   - **Network**: `lan`
+   - **WPA2-PSK/WPA3-SAE Mixed Mode** + strong password
 3. Click **Save**
+4. Click **Save & Apply**
 
 ✅ Now connect a phone to `Personal-VPN-5` — it should get an IP like `192.168.2.101`.
 
@@ -132,4 +138,160 @@ We’ll create two secure Wi-Fi networks — both on the new `192.168.2.0/24` su
 
 1. Go to **System → Software**
 2. Click **Update lists** (top right)
-3. In the **Download and install package** box, type:
+3. In the **Filter** box, type:
+   - **openvpn-openssl** → install
+   - **luci-app-openvpn** → install
+4. Click **OK**
+   <img width="875" height="723" alt="image" src="https://github.com/user-attachments/assets/81f754bb-47ec-4e9c-b109-5499b026e6aa" />
+   > Most of the time, `luci-app-openvpn` was pre-installed with the system.
+   
+   > If you receive an error while attempting to install the `openvpn-openssl` package, check the `Overwrite files from other package(s)` checkbox
+
+> ⏳ Wait 30–60 seconds. You may see a screen about dependencies — **check “Overwrite files...”** if prompted, then click **Install**.
+
+✅ After install, refresh the page. You should now see **Services → OpenVPN** in the menu.
+
+> 💡 If you get “no space”, use `openvpn-mbedtls` instead (smaller). Most providers support it.
+
+---
+
+## 🔐 Step 6: Add Your OpenVPN Configuration
+
+> 📝 Make sure your `.ovpn` file includes:
+> ```text
+> client
+> dev tun
+> redirect-gateway def1
+> ```
+
+1. Go to **Services → OpenVPN → Add**
+2. Fill in:
+- **Name**: `MyVPNProvider`
+- **Config type**: `Client`
+- **Interface**: `WAN`
+- ✔️ **Enable**
+- ✔️ **Start on boot**
+3. In **OVPN configuration file content**, **paste your entire `.ovpn` file** (including `<ca>`, `<cert>`, `<key>` blocks if present)
+4. Click **Save**
+
+> 🔍 Tip: Remove any lines like `up /etc/openvpn/update-resolv-conf` — they don’t work in LuCI.
+
+---
+
+## 🌐 Step 7: Create the `VPN` Interface for `tun0`
+
+Even if `tun0` doesn’t exist yet, we’ll create a placeholder.
+
+1. Go to **Network → Interfaces → Add new interface**
+2. Fill in:
+- **Name**: `VPN`
+- **Protocol**: `Unmanaged`
+- **Interface**: type exactly → `tun0`
+3. Click **Create Interface**
+4. Under **Firewall Settings**:
+- In the dropdown, **type `vpn`** (it will create a new zone)
+5. Click **Save**
+
+> ✅ This will bind to the `tun0` device once OpenVPN starts.
+
+---
+
+## 🔥 Step 8: Configure Firewall Zones (Critical!)
+
+We’ll ensure **only VPN traffic leaves your network**.
+
+### A. Edit the `lan` Zone
+1. Go to **Network → Firewall**
+2. Find **lan** → click **Edit**
+3. Set:
+- **Input**: `accept`
+- **Output**: `accept`
+- **Forward**: `accept`
+- **Allow forward to destination zones**: **ONLY `vpn`** (remove `wan`!)
+4. Click **Save**
+
+### B. Edit the `vpn` Zone
+1. Find **vpn** → click **Edit**
+2. Set:
+- **Input**: `reject`
+- **Output**: `accept`
+- **Forward**: `accept`
+- ✔️ **Masquerading**
+- ✔️ **MSS clamping**
+- **Allow forward to destination zones**: `wan`
+- **Allow forward from source zones**: `lan`
+3. Click **Save**
+
+> 🔒 This creates a **kill switch**: if OpenVPN stops, LAN traffic has nowhere to go.
+
+---
+
+## 🌍 Step 9: Disable IPv6 (Prevent Leaks)
+
+1. Go to **Network → Interfaces → LAN → Edit**
+2. Go to **DHCP Server → IPv6 Settings**
+3. Set all to **Disabled**:
+- Router Advertisement Service
+- DHCPv6 Service
+- NDP Proxy
+4. Click **Save & Apply**
+5. Repeat for **WAN** interface (optional but recommended)
+
+---
+
+## ▶️ Step 10: Start OpenVPN & Verify
+
+1. Go to **Services → OpenVPN**
+2. Click **Start** next to your config
+3. Wait 15 seconds
+4. Check **Status → OpenVPN** — should say **Connected**
+5. From a device on `Personal-VPN-5`:
+- Visit [https://ipleak.net](https://ipleak.net)
+- You should see:
+  - **IP address**: your **VPN provider’s IP**
+  - **ISP**: your **VPN provider**, not SLT
+  - **No DNS leaks**
+
+✅ **Success!** Your Personal VPN Client Network is live.
+
+---
+
+## 🧪 Step 11: Test the Kill Switch
+
+1. In LuCI: **Services → OpenVPN → Stop**
+2. On your phone (still on `Personal-VPN-5`):
+- Try loading a website → should **fail**
+- `ipleak.net` → should time out
+
+✅ If internet dies → your kill switch works.  
+✅ If it still works → double-check **Step 8A** (LAN must NOT forward to `wan`).
+
+---
+
+## 🔄 Step 12: Reboot & Final Validation
+
+1. Go to **System → Reboot → Perform reboot**
+2. Wait 60 seconds
+3. After reboot:
+- OpenVPN should auto-start
+- Connect to `Personal-VPN-2.4` → verify via `ipleak.net`
+- Confirm public IP is the **VPN IP**
+
+---
+
+## 🎉 Done!
+
+You now have:
+- A **private, encrypted Wi-Fi network** for all your devices
+- **Automatic protection** — no per-device setup
+- **Fail-safe privacy** — no leaks if VPN drops
+
+Enjoy your **Personal VPN Client Network**! 🔐
+
+---
+
+> 💡 **Need help?**  
+> - Check logs: **Status → System Log**  
+> - Open an Issue in this repo with your OpenWrt version and provider name
+
+5. 
