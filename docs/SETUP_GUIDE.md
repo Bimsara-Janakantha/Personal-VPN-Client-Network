@@ -28,7 +28,7 @@ This guide assumes (If not [Hardware Guide](https://github.com/Bimsara-Janakanth
 
 ---
 
-## 🌐 Step 3: General Settings (Optional)
+## ✅ Step 2: General Settings (Optional)
 
 Since the router is in default settings, it may differ from your timezone and region.
 
@@ -38,27 +38,60 @@ Since the router is in default settings, it may differ from your timezone and re
 3. Set Timezone (e.g. Asia/Colombo)
 4. Click **Save**
 5. Then go to the **Time Synchronization** tab.
-  <img width="1920" height="1084" alt="image" src="https://github.com/user-attachments/assets/5b82c2ce-f9a2-45d4-9a3f-e1dd981e2baf" />
-6. Remove all NTP servers and add NTP servers for your region. (e.g. `time.cloudflare.com`, `pool.ntp.org`, `lk.pool.ntp.org`).
-7. Keep other settings as they are and **Save**.
+   <img width="1920" height="1084" alt="image" src="https://github.com/user-attachments/assets/5b82c2ce-f9a2-45d4-9a3f-e1dd981e2baf" />
+6. Remove all NTP servers and add NTP servers for your region. (e.g. `time.cloudflare.com`, `pool.ntp.org`, `lk.pool.ntp.org`)
+7. Keep other settings as they are and **Save**
 8. Then **Save & Apply**
 
 ---
 
-## 🌐 Step 2: Change LAN IP (Avoid Conflict with SLT)
+## 🔌 Step 3: Configure WAN (Connect to ISP Router)
 
-Since SLT uses `192.168.1.0/24`, we’ll move OpenWrt to `192.168.2.0/24`.
+1. Connect a **LAN port on ISP Router** → to the **WAN port** on EDUP AX3000.
+2. In LuCI: **Network → Interfaces → WAN → Edit**
+3. Set:
+   - **Protocol**: `DHCP client`
+   - **Firewall settings**: Zone = `wan`
+4. Click **Save & Apply**
+<img width="1770" height="931" alt="image" src="https://github.com/user-attachments/assets/4e3d8d62-a197-43cf-a28f-28fd8b5dfcbc" />
+<img width="1752" height="441" alt="image" src="https://github.com/user-attachments/assets/4a92c0c7-f980-4868-9c4b-8a590d99885f" />
 
+✅ **Verify**:
+- Go to **Status → Overview**
+- Under **Network → IPv4 Upstream**, you should see IP: `192.168.1.2/24` as the address
+
+> ❌ If no IP appears:
+> - Reboot EDUP AX3000 (**System → Reboot** or **OFF and ON the EDUP router**)
+> - Double-check static lease on ISP router (is MAC address correct?)
+
+---
+
+## 🌐 Step 4: Change LAN IP (Avoid Conflict with ISP Router)
+
+Since Huawei uses `192.168.1.0/24`, we’ll move OpenWrt to `192.168.2.0/24`.
+
+### A: Add the new IPv4 (DHCP) Range
 1. In LuCI, go to **Network → Interfaces**
 2. Click **LAN → Edit**
-3. Under **General Setup**:
-- **IPv4 address**: `192.168.2.1`
-- **IPv4 netmask**: `255.255.255.0`
-4. Under **DHCP Server → General Setup**:
-- **Start**: `100`
-- **Limit**: `150` → gives IPs from `192.168.2.100` to `192.168.2.249`
-5. Click **Save & Apply**
+3. Under **General Settings**
+4. Add the ➕ button near **IPv4 address**
+5. Add a new **IPv4 address**: `192.168.2.1/24`
+6. Keep other settings as they are
+7. Click **Save**
+8. Then click **Save & Apply**
+9. After reconfiguring the router, use the new address `http://192.168.2.1` to access the LuCI.
 
+### B: Remove the old IPv4 (DHCP) Range
+1. In LuCI, go to **Network → Interfaces**
+2. Click **LAN → Edit**
+3. Under **General Settings**
+4. Remove the old **IPv4 address** by clicking ❌ button nect to the `192.168.1.1/24` address
+5. Keep other settings as they are
+6. Click **Save**
+7. Then click **Save & Apply**
+8. Wait until the configuration is done.
+9. After reconfiguring the router, LuCI can be accessed only from the new address `http://192.168.2.1`.
+   
 > ⚠️ Your browser will disconnect. **Reconnect at**:
 > ```
 > http://192.168.2.1
@@ -66,27 +99,7 @@ Since SLT uses `192.168.1.0/24`, we’ll move OpenWrt to `192.168.2.0/24`.
 
 ---
 
-## 🔌 Step 3: Configure WAN (Connect to SLT Fiber One)
-
-1. Connect a **LAN port on SLT Fiber One** → to the **WAN port** on EDUP AX3000.
-2. In LuCI: **Network → Interfaces → WAN → Edit**
-3. Set:
-- **Protocol**: `DHCP client`
-- **Firewall settings**: Zone = `wan`
-4. Click **Save & Apply**
-
-✅ **Verify**:
-- Go to **Status → Overview**
-- Under **WAN**, you should see IP: `192.168.1.2`
-- Under **Network**, ping `8.8.8.8` → should succeed
-
-> ❌ If no IP appears:
-> - Reboot EDUP
-> - Double-check static lease on SLT (is MAC address correct?)
-
----
-
-## 📶 Step 4: Set Up Dual-Band Wi-Fi (Your Private VPN Network)
+## 📶 Step 5: Set Up Dual-Band Wi-Fi
 
 We’ll create two secure Wi-Fi networks — both on the new `192.168.2.0/24` subnet.
 
